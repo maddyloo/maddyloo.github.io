@@ -7,11 +7,11 @@
 </head>
 	<body>
 	<div id="header">
-		<h1>Music Across the Years</h1>
+		<h1>Music Throughout the Years<hr></h1>
 	</div>
 		<div id="container_left">
 			<div id="title_left">
-				<h2>Album Sales by genre over the past 7 years</h2>
+				<h2>Album Sales by Genre over the past 7 years</h2>
 				<p>Click to see historic top artist album sales for a specific genre.<p>
 			</div>
 			<div id="genre">Genre:</div>
@@ -22,6 +22,9 @@
             </div>
         </div>
         <div id="container_right">
+        	<div id="title_right">
+				<h2>Top Selling Artists by Genre</h2>
+			</div>
         </div>
 	</body>
 
@@ -58,7 +61,7 @@ d3.json("new_data.json",function(error,json){
 	    	showHistogram(d.data);
 	    })
 	    .on("mouseover",function(d){
-	    	d3.select(this).style("stroke","black");
+	    	d3.select(this).style("stroke","#303030");
 	    	d3.select("#genre")
 	    	.text("Genre: " + d.data.label);
 	    })

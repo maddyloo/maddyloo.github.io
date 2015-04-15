@@ -5,11 +5,12 @@ body {
 h1{
 	font-family: 'Titillium Web', sans-serif;
 	font-size: 40px;
+	letter-spacing: 5px ;
 	color:#808080 ;
 }
 
 #header{
-	padding-bottom: 0px;
+	height:12%;
 }
 
 p {
@@ -21,7 +22,7 @@ p {
 	width:50%;
 }
 
-#container_left {
+#container_left, #container_right {
 	float:left;
 	width:50%;
 	text-align: center;
