@@ -104,9 +104,7 @@ d3.json("totals.json", function(error,totals){
 			// number of top bigrams
 			var top_words = items.slice(0, 8);
 			div_right_bottom.innerHTML = "Click a point on the graph to see selected president's top words.";
-		} else {
-			div_right_bottom.innerHTML = "Click a point on the graph to see selected president's top words.";
-		}
+		} 
 		
 		// make button for each word
 		var buttons = form.selectAll("button")
@@ -149,8 +147,8 @@ function display(word, type){
 		div_bottom.innerHTML = ""
 		var div_top = document.getElementById("top")
 		div_top.innerHTML = ""
-		var div_right = document.getElementById("right")
-		div_right = ""
+		var div_right_bottom = document.getElementById("right")
+		div_right_bottom = "Click a point on the graph to see selected president's top words."
 	}
 
 	div_super.innerHTML = "";
