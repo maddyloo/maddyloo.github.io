@@ -326,7 +326,7 @@ function display(word, type){
 		    function display_right(input) {
 		    	div_right_bottom.innerHTML = "";
 		    	// minus pixels (sensitivity)
-		    	var x = xScale.invert(input[0]+10),
+		    	var x = xScale.invert(input[0]+0),
 		    		i = bisect(store, x);
 		    	var top_words = new_data[output[i].year].top_words;
 		    	//sort top words
