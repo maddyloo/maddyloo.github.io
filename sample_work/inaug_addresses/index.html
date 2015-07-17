@@ -98,10 +98,14 @@ d3.json("totals.json", function(error,totals){
 			div_super.innerHTML = "Below is a list of the most frequently occuring words in all inaugural speeches (the number in parentheses indicates the total number of occurances).  Click on a word to view how its frequency (occurances as a percentage of total speech length) has varied over the years."
 			// number of top words
 			var top_words = items.slice(0, 20);
+			div_right_bottom.innerHTML = "";
 		} else if (type=="bi_grams") {
 			div_super.innerHTML = "Bigrams are pairs or words that frequently occur next to each other.  Below are the most common bigrams throughout all inaugural speeches.  Choose one to view how its frequency."
 			// number of top bigrams
 			var top_words = items.slice(0, 8);
+			div_right_bottom.innerHTML = "";
+		} else {
+			div_right_bottom.innerHTML = "";
 		}
 		
 		// make button for each word
