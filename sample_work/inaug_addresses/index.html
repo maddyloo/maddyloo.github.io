@@ -338,7 +338,7 @@ function display(word, type){
 				});
 				var list = items.slice(0,10)
 				for (var key in list){
-					div_right_bottom.innerHTML += list[key].replace(",",":") + "<br>"
+					div_right_bottom.innerHTML += list[key].toString().replace(",",":") + "<br>"
 				}
 		    }
 
