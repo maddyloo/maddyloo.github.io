@@ -20,6 +20,10 @@ body {
 	line-height: 1.5em;
 }
 
+#header h1 {
+	margin-bottom: 0px;
+}
+
 #super {
 	background-color: #EC583A;
 	font-family: 'Roboto Slab', serif;
@@ -47,7 +51,7 @@ body {
 
 #left, #right {
 	float: left;
-	width: 25%;
+	width: 20%;
 	text-align: center;
 	font-family: 'Hind', sans-serif;
 	color: #F5F5F5;
@@ -56,7 +60,7 @@ body {
 
 #middle{
 	float: left;
-	width: 50%;
+	width: 60%;
 	text-align: center;
 	font-family: 'Hind', sans-serif;
 /*	background: #C7D0D5;*/
