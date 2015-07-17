@@ -338,7 +338,8 @@ function display(word, type){
 				});
 				var list = items.slice(0,10)
 				var name = new_data[output[i].year].name.toString;
-				div_right_bottom.innerHTML = name.replace("\,","\:") + "'s Top Words:<br>";
+				console.log(name)
+				div_right_bottom.innerHTML = name.replace(",",":") + "'s Top Words:<br>";
 				for (var key in list){
 					div_right_bottom.innerHTML += list[key] + "<br>"
 				}
