@@ -120,7 +120,7 @@ d3.json("totals.json", function(error,totals){
 							var gram = d.toString().split(",");
 							return gram[1] + " " + gram[2] + " " + gram[3];
 						} else {
-							return d;
+							return d.toString().replace(",",":");
 						}
 					}
 			})
