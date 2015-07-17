@@ -80,6 +80,8 @@ d3.json("totals.json", function(error,totals){
 		div_top.innerHTML = ""
 		var div_right = document.getElementById("right")
 		div_right = ""
+		var div_right_bottom = document.getElementById("right_bottom")
+		div_right_bottom.innerHTML = ""
 		var form = d3.select("#bottom").append("form")
 		var div_super = document.getElementById("super");
 
@@ -210,6 +212,8 @@ function display(word, type){
 				});
 
 		} else {
+
+			div_right_bottom.innerHTML = "Click a pint on the graph to see selected president's top words.";
 
 			var words = {};
 			var temp = {};
