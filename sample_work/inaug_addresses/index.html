@@ -311,7 +311,7 @@ function display(word, type){
 		        .attr("y", (pad / 2))
 		        .attr("text-anchor", "middle")  
 		        .style("font-size", "18px") 
-		        .text(word);
+		        .text("\"" + word + "\"");
 
 		    function mousemove() {
 		        var x0 = xScale.invert(d3.mouse(this)[0]-15),
@@ -337,6 +337,7 @@ function display(word, type){
 					return second[1] - first[1];
 				});
 				var list = items.slice(0,10)
+				div_right_bottom.innerHTML = new_data[output[i].year].name + "<br>";
 				for (var key in list){
 					div_right_bottom.innerHTML += list[key] + "<br>"
 				}
