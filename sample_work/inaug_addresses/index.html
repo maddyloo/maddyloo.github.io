@@ -325,7 +325,8 @@ function display(word, type){
 		    // adds info to right panel on click
 		    function display_right(input) {
 		    	div_right_bottom.innerHTML = "";
-		    	var x = xScale.invert(input[0]-15),
+		    	// minus pixels (sensitivity)
+		    	var x = xScale.invert(input[0]-8),
 		    		i = bisect(store, x);
 		    	var top_words = new_data[output[i].year].top_words;
 		    	//sort top words
