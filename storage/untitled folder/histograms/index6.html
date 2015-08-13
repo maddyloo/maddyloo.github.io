@@ -1,0 +1,159 @@
+<html>
+<style>
+body { font-family: "Open Sans"; }
+svg { border: solid black 1px; }
+.bar rect { fill: #ccc; }
+.axis path { fill: none; stroke: black;}
+.axis line { stroke: black; }
+.axis text { font-size: x-small; }
+</style>
+
+<h3>Problem 2:</h3>
+	<div id="graph_2"></div>
+<h3>Problem 3:</h3>
+	<div id ="graph_3"></div>
+	<p>This graph has a similar sort of normal distribution as seen in problem 2; not exactly the same sue to randomness, yet roughly the same.  The x-scale is differen however; in problem 2 the scale usually ranges between -2 or -3 and 2 and 3 whereas in this graph the mean corrects for many such outliers and the range is usually within [-1,1].
+<h3>Problem 4:</h3>
+	<div id="graph_4"></div>
+<h3>Problem 5:</h3>
+	<div id="graph_5"></div>
+	<p>The histogram of the means of the exponential arrays is a normal-shaped distribution, unlike the exponential distribution which peaks near 0 and descends exponentially towards higher numbers (around 10 or so) that appear very infrequently.  However when you average an array of number, the majority of which are near 0 or 1 with outliers closer to 10 the result is a distribution with mean around 1 and a range of around 0.1</p>
+<h3>Problem 6:</h3>
+	<div id="graph_6"></div>
+<h3>Problem 7:</h3>
+	<div id="graph_7"></div>
+	<p>The means of the gaussian and exponential arrays were roughly normal distributions; the histogram for the cauchy values has a sort of normal shape (high probability at the center, decreasing in each direction along the axes).  It is a much more extreme drop-off though, compared to the graphs in 3 and 5.  The reason for this has to do with the spread of cauchy data; dividing two gaussian numbers often results in a value around 0 yet in extreme cases (for example, 2/0.001 is 2,000).  These outliers, when they occur, have the potential to be very large and skew that data.  For this reason, the xAxis often has a large cluster around 0 and an outlier with a large magnitude that increases the range often into the hundreds.  These numbers heavily affect the mean values displayed in this histogram. </p>
+
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+<script>
+function plotHistogram(el_id,array){
+	var padding = 30;
+	var width = 400;
+	var height = 400;
+
+	var histogram = d3.layout.histogram().bins(20);
+	var bins = histogram(array);
+	var binWidth = bins[0].dx;
+
+	var xScale = d3.scale.linear()
+		.domain([d3.min(array), d3.max(array)])
+		.range([0 + padding, width-(padding/2)]);
+	var yScale = d3.scale.linear()
+		.domain([0, d3.max(bins, function(bin) {return bin.y; })])
+		.range([height - padding, padding/2]);
+
+	var svg = d3.select(el_id).append("svg")
+		.attr("height", height)
+		.attr("width", width);
+
+	var bars = svg.selectAll(".bar").data(bins);
+	bars.enter().append("g").attr("class", "bar");
+	bars.attr("transform", function(bin){
+		return "translate(" + xScale(bin.x) + "," + yScale(bin.y) + ")";
+	});
+	bars.append("rect")
+		.attr("x",1)
+		.attr("width",xScale(binWidth)-xScale(0) - 1)
+		.attr("height", function(bin) {return height - padding - yScale(bin.y);});
+	bars.append("text")
+		.attr("x", 0.5 * (xScale(binWidth) - xScale(0) - 1))
+		.attr("y", -3)
+		.style("font-size", "x-small")
+		.style("text-anchor", "middle")
+		.style("fill", "#777")
+		.text(function (bin) { return bin.y; });
+
+	var xAxis = d3.svg.axis().scale(xScale);
+	svg.append("g")
+  		.attr("class", "axis")
+  		.attr("transform", "translate(0, " + (height - padding) + ")")
+  		.call(xAxis);
+  	svg.append("text")
+  		.attr("text-anchor","end")
+  		.attr("x", width/2)
+  		.attr("y", height-2)
+  		.style("font-size", "small")
+  		.text("values");
+	
+	var yAxis = d3.svg.axis().scale(yScale).orient("left");
+	svg.append("g")
+		.attr("class", "axis")
+		.attr("transform", "translate(" + padding + ", 0)")
+		.call(yAxis);
+	  svg.append("text")
+  		.attr("text-anchor","end")
+  		// .attr("dy", 0)
+  		.attr("y",7)
+  		.attr("x", -(width/2))
+  		.attr("transform","rotate(-90)")
+  		.style("font-size", "small")
+  		.text("occurances");
+};
+
+function gaussian(){
+	var num = d3.random.normal()();
+	return num;
+}
+
+function gaussian1000(){
+	var gauss = new Array(1000);
+	for (var j=0;j<1000;j++){
+		gauss[j] = gaussian();
+	}
+	return gauss;
+};
+
+function exponential1000(){
+	var expo = new Array(1000);
+	for (var i=0;i<1000;i++){
+		expo[i] = -Math.log(Math.random());
+	}
+	return expo;
+};
+
+function cauchy1000(){
+	var cauch = new Array(1000);
+	for (var i=0;i<1000;i++){
+		var num = gaussian();
+		var denom = gaussian();
+		cauch[i] = num/denom;
+	}
+	return cauch;
+}
+
+var rand = gaussian1000();
+plotHistogram("#graph_2",rand);
+
+var data100 = new Array(100);
+for (var k=1;k<100;k++){
+	var gaussian_array = gaussian1000();
+	var mean = d3.mean(gaussian_array);
+	data100[k] = mean;
+};
+plotHistogram("#graph_3",data100);
+
+var expo1000 = exponential1000();
+plotHistogram("#graph_4",expo1000);
+
+var expo100 = new Array(100);
+for (var k=1;k<100;k++){
+	var expo_array = exponential1000();
+	var mean_expo = d3.mean(expo_array);
+	expo100[k] = mean_expo;
+};
+plotHistogram("#graph_5",expo100);
+
+var cauchy = cauchy1000();
+plotHistogram("#graph_6",cauchy);
+
+var cauch100 = new Array(100);
+for (var l = 1;l<100;l++){
+	var cauchy_array = cauchy1000();
+	var mean_cauchy = d3.mean(cauchy_array);
+	cauch100[l] = mean_cauchy;
+};
+plotHistogram("#graph_7",cauch100);
+</script>
+
+</html>
