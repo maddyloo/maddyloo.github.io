@@ -1,0 +1,240 @@
+<html>
+<head>
+	<link href='http://fonts.googleapis.com/css?family=Slabo+27px' rel='stylesheet' type='text/css'>
+    <!-- Load the d3 library. -->
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <style>
+        body { font-family: "Open Sans"; background-color: #C7D9F0; } 
+        div { margin: 30px; }
+        h1, h2, { color: red; }
+        form .back {
+            float: right;
+            z-index: 10;
+            opacity: .6;
+            height: 7%;
+            border-radius: 4px;
+        }
+        form .back:hover{
+            border: solid black 2px;
+        }
+    </style>
+</head>
+<body>
+<FORM>
+    <INPUT Type="image" class="back" src="http://localhost:8888/back.jpg" onClick="history.go(-1);return true;">
+</FORM>
+
+    <h1 style="font-family: 'Slabo 27px' serif'" align="center">San Fransisco Bay Area Bike Share Ridership</h1>
+    <h2 style="font-family: 'Slabo 27px' serif'" align="center">Number of Bikers Per Day: August 2013 - August 2014</h2>
+    <h3 align="center" style="font-family: 'Slabo 27px' serif'" style = "font-style: italic;">Higher color saturation indicates higher temperatures while lower color saturation indicates lower temperatures. <br> Ticks measure the daily number of riders.</h3>
+    <p align="center" style="font-family: 'Slabo 27px' serif'">Not sure where to start? <br> Take a look at the much bigger difference in riders between week days and weekends in the warmer summer months as opposed to more level participation in the Fall!</p>
+
+    <div id="canvas" align="center"></div>
+
+<script>
+// Dimensions of sunburst
+var width = 1000;
+var height = 800;
+var radius = Math.min(width, height) / 4;
+var onedayangle = 2*Math.PI/365.0;
+var halfdayangle= Math.PI/365.0;
+var total=100;
+
+// Creating svg and centering g elements
+var svg = d3.select("#canvas").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("display","block")
+    .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height * .52 + ")");
+    
+// Pattern fill for main circle
+var pattern = svg
+    .append("defs")
+    .append("pattern").attr("id", "pattern")
+    .attr("patternUnits", "objectBoundingBox").attr("height","1").attr("width","1")
+    .attr("viewBox", "0 0 1 1").attr("preserveAspectRatio","xMidYMid slice")
+    .append("image")
+    .attr("height","1").attr("width","1")
+    .attr("preserveAspectRatio","xMidYMid slice")
+    .attr("xlink:href", "biker.jpg")
+
+// Center circle
+var circle = svg
+    .append("circle")
+    .attr("id", "circ")
+    .attr("cx", 0)
+    .attr("cy", 0)
+    .attr("r", radius)
+    .attr("fill", "url(#pattern)")
+    .style("fill-opacity", 0.9)
+
+// Top right label
+var fall = svg.append("text")
+    .style("font-family", "'Slabo 27px' serif'")
+    .style("font-size","40px")
+    .attr("x", 300)
+    .attr("y", -350)
+    .text("Fall")
+    .attr("text-anchor", "middle")
+    .attr("fill", "red");
+
+// Bottom right label
+var winter = svg.append("text")
+    .style("font-size", "40px")
+    .style("font-family", "'Slabo 27px' serif'")
+    .attr("x", 325)
+    .attr("y", 350)
+    .text("Winter")
+    .attr("text-anchor", "middle")
+    .attr("fill", "blue"); 
+
+// Bottom left label
+var Spring = svg.append("text")
+    .style("font-size", "40px")
+    .style("font-family", "'Slabo 27px' serif'")
+    .attr("x", -325)
+    .attr("y", 350)
+    .text("Spring")
+    .attr("text-anchor", "middle")
+    .attr("fill", "green");
+
+// Top left label
+var Summer = svg.append("text")
+    .style("font-size", "40px")
+    .style("font-family", "'Slabo 27px' serif'")
+    .attr("x", -300)
+    .attr("y", -350)
+    .text("Summer")
+    .attr("text-anchor", "middle")
+    .attr("fill", "yellow");
+    
+
+var bikeData;
+    
+d3.json("ordered_data.json", function(error, data) {
+    bikeData = data;
+    
+    // Create arc to represent the bar for each day's bike usage
+    var arc = d3.svg.arc()
+        .startAngle(function(d, i) {return (i*onedayangle)-halfdayangle;})
+        .endAngle(function(d, i) {return (i*onedayangle)+halfdayangle;})
+        .innerRadius(function(d) {return radius;})
+        .outerRadius(function(d) { return (.1*d.Total)+radius });
+ 
+ 
+    // Create the actual bars from data
+    var path = svg.selectAll("path")
+        .data(bikeData)
+        .enter()
+        .append("g")
+        .append("path")
+        .attr("d", arc)
+        .style("stroke", "black")
+        .attr("stroke-width",".5")
+        .style("fill", function(d) { return d.Color });
+    
+
+    // Find height axis max
+    var maxHeight = d3.max(bikeData, 
+	   function (d) {
+		  return d.Total;
+	   });
+    // Number of ticks
+    var numTicks = 5;
+    //fill in tick increment array
+    var tickIncrements = [];
+    for (var i=0; i<numTicks; i++) {
+        tickIncrements[i] = (i+1)*(maxHeight/numTicks);
+    }
+    
+    // Circular tick marks
+    var circleTick1 = svg.append("circle").attr("id", "circleTick1")
+    .attr("cx","0").attr("cy","0")
+    .attr("r", (radius+(.1*tickIncrements[0])))
+    .attr("fill","none")
+    .attr("stroke","black")
+    .attr("stroke-width",".5");
+    
+    var circleTick2 = svg.append("circle").attr("id", "circleTick2")
+    .attr("cx","0").attr("cy","0")
+    .attr("r", (radius+(.1*tickIncrements[1])))
+    .attr("fill","none")
+    .attr("stroke","black")
+    .attr("stroke-width",".5");
+    
+    var circleTick3 = svg.append("circle").attr("id", "circleTick3")
+    .attr("cx","0").attr("cy","0")
+    .attr("r", (radius+(.1*tickIncrements[2])))
+    .attr("fill","none")
+    .attr("stroke","black")
+    .attr("stroke-width",".5");
+    
+    var circleTick4 = svg.append("circle").attr("id", "circleTick4")
+    .attr("cx","0").attr("cy","0")
+    .attr("r", (radius+(.1*tickIncrements[3])))
+    .attr("fill","none")
+    .attr("stroke","black")
+    .attr("stroke-width",".5");
+    
+    var circleTick5 = svg.append("circle").attr("id", "circleTick5")
+    .attr("cx","0").attr("cy","0")
+    .attr("r", (radius+(.1*tickIncrements[4])))
+    .attr("fill","none")
+    .attr("stroke","black")
+    .attr("stroke-width",".5");
+    
+    // Tick mark text
+    var circleTick5_text = svg.append("text").attr("id","circleTick5_text")
+    .text(Math.round(tickIncrements[4]))
+    .attr("x","-10").attr("y","-350")
+    .attr("height","50").attr("width","50")
+    .attr("fill", "black")
+    .style("font-size", "27px")
+    .style("font-family", "'Slabo 27px' serif'")
+    .attr("text-anchor","middle")
+    .attr("alignment-baseline","middle");
+    
+    var circleTick4_text = svg.append("text").attr("id","circleTick4_text")
+    .text(Math.round(tickIncrements[3]))
+    .attr("x","-10").attr("y","-320")
+    .attr("height","50").attr("width","50")
+    .style("font-size", "25px")
+    .style("font-family", "'Slabo 27px' serif'")
+    .attr("fill", "black")
+    .attr("text-anchor","middle")
+    .attr("alignment-baseline","middle");
+    
+    var circleTick3_text = svg.append("text").attr("id","circleTick3_text")
+    .text(Math.round(tickIncrements[2]))
+    .attr("x","-10").attr("y","-290")
+    .attr("height","50").attr("width","50")
+    .style("font-size", "25px")
+    .style("font-family", "'Slabo 27px' serif'")
+    .attr("fill", "black")
+    .attr("text-anchor","middle")
+    .attr("alignment-baseline","middle");
+    
+    var circleTick2_text = svg.append("text").attr("id","circleTick2_text")
+    .text(Math.round(tickIncrements[1]))
+    .attr("x","-10").attr("y","-260")
+    .attr("height","50").attr("width","50")
+    .style("font-size", "25px")
+    .style("font-family", "'Slabo 27px' serif'")
+    .attr("fill", "black")
+    .attr("text-anchor","middle")
+    .attr("alignment-baseline","middle");
+    
+    var circleTick1_text = svg.append("text").attr("id","circleTick1_text")
+    .text(Math.round(tickIncrements[0]))
+    .attr("x","-10").attr("y","-230")
+    .attr("height","50").attr("width","50")
+    .style("font-size", "25px")
+    .style("font-family", "'Slabo 27px' serif'")
+    .attr("fill", "black")
+    .attr("text-anchor","middle")
+    .attr("alignment-baseline","middle");
+});
+</script>
+</body>
+</html>
