@@ -1,0 +1,246 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link href='http://fonts.googleapis.com/css?family=Arvo:400,700' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,700' rel='stylesheet' type='text/css'>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+</head>
+<body>
+	<div id="header">
+		<h1>Music Throughout the Years</h1>
+	</div>
+	<div id="container_left">
+		<div id="title_left">
+			<h2>Album Sales by Genre over the past 7 years</h2>
+			<p>Click to see historic top artist album sales for a specific genre.<p>
+		</div>
+		<div id="genre"><i>Hover to see a</i></div>
+		<div id="genreSales"><i>particular genre's sales</i></div>
+		<div id='chart'></div>
+		<div id="slider">
+			<input type="range" id="scale" min=0 max=6 value=0><br>
+			<label>Year: 2008</label>
+		</div>
+	</div>
+	<div id="container_right">
+		<div id="title_right">
+			<h2>Top Selling Artists by Genre</h2>
+		</div>
+		<div id="artistYears"><i>Hover to see details about the </i></div>
+		<div id="artistSales"><i>artist's years active and total sales</i></div><br>
+		<div id="sales"></div>
+		<div>**ordered from highest grossing (top) to lowest (bottom)</div>
+	</div>	
+	
+</body>
+
+<script type="text/javascript">
+
+// LEFT SIDE
+var color = d3.scale.category20();
+
+//parses data for pie visualization
+d3.json("new_data.json",function(error,json){
+	var width = 350,
+		height = 350,
+		radius = Math.min(width, height) / 2;
+
+	var arc = d3.svg.arc()
+		.outerRadius(radius - 10);
+
+	var pie = d3.layout.pie()
+		.sort(null)
+		.value(function(d) {
+			return d.value;
+		});
+
+	var svg = d3.select("#chart").append("svg")
+		.attr("width", width)
+		.attr("height", height)
+		.append("g")
+		.attr("id", "pieChart")
+		.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+	//sets up pie chart sections w/necessary functions
+	var path = svg.selectAll("path")
+		.data(pie(json[0].data))
+		.enter()
+		.append("path")
+		.on("click",function(d) {
+			showHistogram(d.data);
+		})
+		//display genre of section
+		.on("mouseover",function(d){
+			d3.select(this).style("stroke","#303030");
+			d3.select("#genre")
+			.text("Genre: " + d.data.label);
+			d3.select("#genreSales")
+			.text("Sales: " + d.data.value + " million albums");		
+		})
+		//
+		.on("mouseout",function(){
+			d3.select(this).style("stroke","none");
+			d3.select("#genre")
+			.text("Hover to see")
+			.style("font-style","italic");
+			d3.select("#genreSales")
+			.text("a specific genre's sales")
+			.style("font-style","italic");
+		});
+
+	//assigns speed to animation
+	path.transition()
+		.duration(500)
+		.attr("fill", function(d, i) {
+			return color(d.data.label);
+		})
+		.attr("d", arc)
+		.each(function(d) {
+			// store the initial angles
+			this._current = d;
+		});
+
+	//gets input from year slider
+	d3.selectAll("input")
+		.on("change",change)
+
+	function change() {
+		var num = this.value
+		path.data(pie(json[num].data));
+		//interpolates to show animation between years
+		path.transition().duration(750).attrTween("d", arcTween); // redraw the arcs
+			d3.selectAll("label")
+			.text("Year: " + json[num].year);
+	}
+
+	//stores displayed angles and interpolates to new angles
+	function arcTween(a) {
+		var i = d3.interpolate(this._current, a);
+		this._current = i(0);
+		return function(t) {
+			return arc(i(t));
+		};
+	}
+});
+
+// RIGHT SIDE
+var height = 450,
+	width = 600;
+
+//set up new svg for histogram
+var svgBlank = d3.select("#sales")
+	.append("svg")
+	.attr("height", height)
+	.attr("width",width);
+
+var g2 = svgBlank.append("g");
+
+//instructions for how to get to second visualization
+var g3 = svgBlank.append("g")
+	.append("text")
+	.text("Click the chart to the left to see historic top artist sales for a specific genre.")
+	.attr("x", width/2)
+	.attr("y", (height/2)-50)
+	.attr("text-anchor", "middle");
+
+//function called on 'click' of genre from pie chart; creates artist histogram
+function showHistogram(input) {
+
+	var genre = input.label;
+
+	var data2 = [];
+	
+	//clears the instruction to click on the pie chart by adding no text
+	g3.text("");
+	
+	//clears previous histogram on each click
+	g2.selectAll("*").remove();
+
+	//no top artists for this genre in our data
+	if (genre == "Christian/Gospel"){
+		g2.append("text")
+            .text("There are no top selling artists from this genre.")
+         	.attr("x", width/2)
+            .attr("y", height/2)
+            .attr("text-anchor","middle");		
+	} else {
+
+		//parses data for histogram visualization
+		//selects top artist for selected genre
+		d3.json("sales.json",function(error,json){
+			//get data for given genre
+			for (var i=0;i<json.length;i++){
+				if ((json[i].Genre.indexOf(genre)) > -1){
+					var temp = json[i];
+					temp.Period = temp.Period.split(" ");
+					data2.push(temp);
+				}
+			};
+
+			//limit to top ten results (JSON comes in order)
+			if (data2.length >= 10){
+				data2.length = 10;
+			};
+
+			var dy = 40;
+
+			//scales for year timeline
+			var yearScalePos = d3.scale.linear()
+				.domain([1945, 2015])
+				.range([200,width]);
+			
+			var yearScaleWidth = d3.scale.linear()
+				.domain([0,70])
+				.range([0,width]);
+
+			//appends bars for each artist (by genre)
+			var bars = g2.selectAll(".bar")
+				.data(data2)
+				.enter()
+				.append("rect")
+				.attr("x", function(d) {
+					return yearScalePos(d.Period[0]);
+				})
+				.attr("y", function(d, i) {return dy*i;})
+				.attr("width", function(d) {
+					return yearScaleWidth(d.Period[1]-d.Period[0]);
+				})
+				.attr("height", 20)
+				.attr("fill", function(){return color(genre)})
+				.on("mouseover", function(d){
+					d3.select("#artistYears")
+					.text("Years Active: " + d.Period[0] + "-" + d.Period[1]);
+					d3.select("#artistSales")
+					.text("Total Sales: $" + d.CertifiedSales + "M");
+					d3.select(this).style("stroke","#303030");
+				})
+				.on("mouseout",function(){
+					d3.select("#artistYears")
+					.text("Hover to see details about the ")
+					.style("font-style","italic");
+					d3.select("#artistSales")
+					.text("artist's years active and total sales")
+					.style("font-style","italic");
+					d3.select(this).style("stroke","none");
+				});
+
+			//adds artist name
+			for (var d in data2){
+				g2.append("text")
+					.data(data2)
+					.attr("x",175)
+					.attr("y",(d*dy)+20)
+					.text(function(){return data2[d].Artist;})
+					.attr("text-anchor","end");
+			};
+
+		     var xAxis = d3.svg.axis().scale(yearScalePos).tickFormat(d3.format("d"));
+		        g2.append("g")
+		        .attr("class", "axis")
+		        .attr("transform", "translate(0, " + (data2.length*dy)+")")
+		        .call(xAxis);
+		})
+	}
+};
+</script>
+</html>

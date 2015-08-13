@@ -1,0 +1,369 @@
+<html>
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="inaug_theme.css">
+<link href='http://fonts.googleapis.com/css?family=Roboto+Slab:700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Hind' rel='stylesheet' type='text/css'>
+
+<link href='http://fonts.googleapis.com/css?family=Roboto+Slab:300' rel='stylesheet' type='text/css'>
+
+<style>
+form .back {
+	float: right;
+	z-index: 1;
+	opacity: .6;
+	height: 7%;
+	border-radius: 4px;
+}
+form .back:hover{
+	border: solid black 2px;
+}
+</style>
+</head>
+
+<body>
+<FORM>
+	<INPUT Type="image" class="back" src="http://localhost:8888/back.jpg" onClick="history.go(-1);return true;">
+</FORM>
+<div id="header"><h1>[ Analysis of ]<br>Presidential Inaugural Addresses</h1></div>
+<div id="main">
+	<div id="left"><h3>Select a category to explore in further detail.</h3><br>
+		<div id="menu">
+			<form>
+				<input class="select_left" type="button" id="select" value="Word Totals"><br>
+				Total number of words in each Inaugural Address<br><br>
+				<input class="select_left" type="button" id="select" value="Top Words"><br>
+				Frequency of overall most common words over the years<br><br>
+				<input class="select_left" type="button" id="select" value="Bi-Grams"><br>
+				Frequency of overall most common bi-grams (two word collocations)<br>
+			</form>
+		</div>
+	</div>
+	<div id="middle">
+		<div id="super"></div>
+		<div id="top"><h2></h2></div>
+		<div id="bottom"><h2>Over the past two centuries US presidents have delivered a total of 54 Inaugural Addresses.  The speeches have varied over the years in response to the changing political tides within our country and around the world. <br> - <br>
+		Taking a closer look at trends in the words chosen for these speeches is an interesting peek into our nation's diverse and expansive history.  <br> - <br>Start your exploration to the left.</h2></div>
+	</div>
+	<div id="right">
+		<div id="right_top"></div>
+		<div id="right_bottom"></div>
+	</div>
+</div>
+</body>
+
+<script>
+
+d3.json("totals.json", function(error,totals){
+
+	var total_top_words = totals.top_words
+	var total_top_bigrams = totals.bi_grams
+	var total_top_trigrams = totals.tri_grams
+
+	//var div_bottom = document.getElementById("bottom")
+
+	d3.selectAll("#select").on("click",function(){
+		if (this.value == "Top Words"){
+			make_buttons(total_top_words, "top_words");
+		} else if (this.value == "Bi-Grams"){
+			make_buttons(total_top_bigrams, "bi_grams");
+		} else if (this.value == "Word Totals"){
+			display("totals","word_totals");
+		}	
+	})
+	
+	function make_buttons(input_array, type){
+		// clear divs
+		var div_bottom = document.getElementById("bottom")
+		div_bottom.innerHTML = ""
+		var div_top = document.getElementById("top")
+		div_top.innerHTML = ""
+		var div_right = document.getElementById("right")
+		div_right = ""
+		var form = d3.select("#bottom").append("form")
+		var div_super = document.getElementById("super");
+
+		// sort input array (grams don't need sorting)
+		var items = Object.keys(input_array).map(function(key) {
+			return [key, input_array[key]];
+		});
+		items.sort(function(first, second) {
+			return second[1] - first[1];
+		});
+
+		// description for top words and bigrams
+		if (type=="top_words") {
+			div_super.innerHTML = "Below is a list of the most frequently occuring words in all inaugural speeches (the number in parentheses indicates the total number of occurances).  Click on a word to view how its frequency (occurances as a percentage of total speech length) has varied over the years."
+			// number of top words
+			var top_words = items.slice(0, 20);
+		} else if (type=="bi_grams") {
+			div_super.innerHTML = "Bigrams are pairs or words that frequently occur next to each other.  Below are the most common bigrams throughout all inaugural speeches.  Choose one to view how its frequency."
+			// number of top bigrams
+			var top_words = items.slice(0, 8);
+		}
+		
+		// make button for each word
+		var buttons = form.selectAll("button")
+			.data(top_words)
+			.enter()
+			.insert("input")
+			.attr({
+				class: "select_middle",
+				id: "select",
+				type: "button",
+				name: "top_word",
+				value: function(d) {
+						if (type=="bi_grams"){
+							var gram = d.toString().split(",");
+							return gram[1] + " " + gram[2];
+						} else if (type=="tri_grams"){
+							var gram = d.toString().split(",");
+							return gram[1] + " " + gram[2] + " " + gram[3];
+						} else {
+							return d;
+						}
+					}
+			})
+			.on("click", function(){display(this.value, type);})
+	}
+})
+
+function display(word, type){
+
+	var h = 400,
+		w = 700,
+		pad = 60;
+
+	var div_super = document.getElementById("super"),
+		div_right_top = document.getElementById("right_top"),
+		div_right_bottom = document.getElementById("right_bottom");
+
+	if (type=="word_totals"){
+		var div_bottom = document.getElementById("bottom")
+		div_bottom.innerHTML = ""
+		var div_top = document.getElementById("top")
+		div_top.innerHTML = ""
+		var div_right = document.getElementById("right")
+		div_right = ""
+	}
+
+	div_super.innerHTML = "";
+
+	var word = word.split(",")[0];
+	// make line chart of that word's frequency over time
+	// parse addresses.json here?
+
+	// clear previous svgs
+	d3.select("svg").remove();
+
+	var svg = d3.select("#top").append("svg")
+		.attr("height",h)
+		.attr("width",w)
+
+	var xScale = d3.scale.linear().range([pad,w-(pad/2)]);
+		yScale = d3.scale.linear().range([h-pad,pad]);
+
+	var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(d3.format("d"));
+	if (type=="top_words"){
+		var	yAxis = d3.svg.axis().scale(yScale).orient("left").tickFormat(d3.format(".1%"));
+	} else if (type == "bi_grams") {
+		var	yAxis = d3.svg.axis().scale(yScale).orient("left").tickFormat(d3.format("p"));
+	} else if (type == "word_totals") {
+		var	yAxis = d3.svg.axis().scale(yScale).orient("left").tickFormat(d3.format("d"));
+	}
+
+	var valueline = d3.svg.line()
+		.x(function (d) { return xScale(d.year); })
+		.y(function (d) { return yScale(d.freq); })
+		.interpolate("monotone");
+
+	d3.json("addresses.json",function(error,data){
+		console.log(data.length)
+		if (type == "word_totals"){
+
+			var output = [];
+			var temp = {};
+			for (var item in data){
+				var year = data[item].data.year;
+				var word_total = data[item].data.word_total;
+				output.push({
+					"year": year,
+					"word_total": word_total
+				})
+			}
+
+			yScale.domain([0, d3.max(output, function (d) { return d.word_total; })])
+			xScale.domain(d3.extent(output, function (d) { return d.year; }))
+
+			var bar = svg.selectAll(".bar")
+				.data(output)
+				.enter().append("g")
+					.attr("class","bar")
+					.attr("transform", function(d) {return "translate(" + xScale(d.year) + "," + (yScale(d.word_total)-pad) + ")";});
+
+			bar.append("rect")
+				.attr("x",1)
+				.attr("width",5)
+				.attr("height", function(d) { return h - yScale(d.word_total); })
+				.on("mouseover",function() {
+					console.log("hello")
+				});
+
+		} else {
+
+			var words = {};
+			var temp = {};
+			var output = [];
+			var year, id;
+
+			if (type!="top_words"){
+				word = word.split(" ")
+			}
+
+			var new_data = {};
+			for (var i in data){
+				new_data[data[i].data.year] = data[i].data
+			}
+
+			for (var i in data){
+				year = data[i].data.year;
+				words = data[i].data[type];
+				id = data[i].id;
+
+				// list of lists to dictionary of lists
+				if (type!="top_words"){
+					var dict = {}, j;
+					for (j=0;j<words.length;j++){
+						var key = words[j][0];
+						dict[key] = words[j][1];
+					}
+					words = dict;
+				}
+
+				// percentages for top words NOT bigrams?
+				if (word in words){
+					if (type=="top_words"){
+						temp[year] = words[word]/data[i].data.word_total;
+					} else if (type == "bi_grams"){
+						temp[year] = words[word];
+					}	
+				} else {
+					temp[year] = 0;
+				}
+			}
+
+			var temp2 = {};
+			var years = Object.keys(temp);
+			for (var j=0;j<years.length;j++){
+				temp2["year"] = years[j]
+				temp2["freq"] = temp[years[j]]
+				output.push(temp2)
+				temp2 = {}
+			}
+
+			var store = [];
+			for (var i in output){
+				store.push(output[i].year)
+			}
+
+			var bisect = d3.bisector(function(d){return d}).left;
+			
+			xScale.domain(d3.extent(output, function (d) { return d.year; }))
+			yScale.domain([0, d3.max(output, function (d) { return d.freq; })])
+
+			svg.append("svg:path")
+				.attr("fill","none")
+				.attr("stroke","#EC583A")
+				.attr("stroke-width",3)
+				.attr("d", valueline(output))
+				.transition()
+				.duration(3000)
+				.attrTween("stroke-dasharray", function() {
+					var length = this.getTotalLength();
+					return function(t) { return (d3.interpolateString("0," + length, length + ",0"))(t) };
+				});
+
+		   
+
+		    var focus = svg.append("g")
+		    	.attr("class", "focus")
+		    	.style("display", "none");
+
+			focus.append("circle")
+			    .attr("r", 8);
+
+			focus.append("text")
+			    .attr("x", 9)
+			    .attr("dy", ".35em");
+
+			svg.append("rect")
+			    .attr("class", "overlay")
+			    .attr("width", w)
+			    .attr("height", h)
+			    .attr("transform","translate(" + 0 + ",0)")
+			    .on("mouseover", function() { focus.style("display", null); })
+			    .on("mouseout", function() { focus.style("display", "none"); })
+			    .on("mousemove", mousemove)
+			    .on("click",function() { display_right(d3.mouse(this)) });
+
+			var title = svg.append("text")
+		        .attr("x", (w / 2))             
+		        .attr("y", (pad / 2))
+		        .attr("text-anchor", "middle")  
+		        .style("font-size", "18px") 
+		        .text(word);
+
+		    function mousemove() {
+		        var x0 = xScale.invert(d3.mouse(this)[0]-15),
+		        	i = bisect(store, x0);
+		        focus.attr("transform", function() {
+		        	return "translate(" + xScale(output[i].year) + "," + yScale(output[i].freq) + ")";}
+		        	);
+				div_right_top.innerHTML = new_data[output[i].year].name + ", " + new_data[output[i].year].year
+		    }
+
+		    // adds info to right panel on click
+		    function display_right(input) {
+		    	div_right_bottom.innerHTML = "";
+		    	var x = xScale.invert(input[0]-15),
+		    		i = bisect(store, x);
+		    	var top_words = new_data[output[i].year].top_words;
+		    	//sort top words
+		    	var items = Object.keys(top_words).map(function(key) {
+					return [key, top_words[key]];
+				});
+				items.sort(function(first, second) {
+					return second[1] - first[1];
+				});
+				var list = items.slice(0,10)
+				for (var key in list){
+					div_right_bottom.innerHTML += list[key] + "<br>"
+				}
+		    }
+
+		}
+
+	// Add the X Axis
+	    svg.append("svg:g")
+	        .attr("class", "axis")
+	        .attr("transform", "translate(0," + (h-pad) + ")")
+	        .call(xAxis)
+	        .selectAll("text")
+	        	.style("text-anchor","end")
+	        	.attr("dx","-.15em")
+	        	.attr("dy",".5em")
+	        	.attr("transform", function(d) {
+	        		return "rotate(-45)";
+	        	});
+
+	    // Add the Y Axis
+	    svg.append("svg:g")
+	        .attr("class", "axis")
+	        .attr("transform", "translate(" + pad + ",0)")
+	        .call(yAxis);
+
+	})
+
+}
+
+</script>

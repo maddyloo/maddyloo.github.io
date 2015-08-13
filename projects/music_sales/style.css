@@ -1,0 +1,68 @@
+body {
+	font-family: 'Arvo', serif;
+}
+
+h1{
+	font-family: 'Titillium Web', sans-serif;
+	font-size: 40px;
+	letter-spacing: 5px ;
+	color:#808080 ;
+	position: relative;
+	left: 35px;
+	top: 20px;
+	margin-top: 0px;
+	padding: 0px;
+}
+
+#header{
+	height:10%;
+}
+
+p {
+	font-style: italic;
+}
+
+#container_right {
+	float:right;
+	width:50%;
+}
+
+#container_left, #container_right {
+	float:left;
+	width:50%;
+	text-align: center;
+}
+
+#chart, #slider, #genre {
+	padding:2%;
+}
+
+#scale {
+	width:40%;
+	padding:2%;
+}
+
+#slider {
+  width: 500px;
+  margin: 20px auto;
+}
+
+.axis path { 
+	fill: none; 
+	stroke: black;
+}
+
+.axis line { 
+	stroke: black; 
+}
+.axis text { 
+	font-size: x-small; 
+}
+
+#scale {
+	width: 325px;
+}
+
+#pic {
+	top: 30px;
+}

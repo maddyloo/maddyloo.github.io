@@ -1,0 +1,85 @@
+[{ "year" : "2008", "data" :[
+		{"label" : "Christian/Gospel", "value" : 29.79},
+		{"label" : "Country", "value" : 47.66},
+		{"label" : "Electronic", "value" : 0},
+		{"label" : "Latin", "value" : 25.13},
+		{"label" : "R&B", "value" : 77.01},
+		{"label" : "Rock", "value" : 139.67},
+		{"label" : "Pop", "value" :	0},
+		{"label" : "Alternative", "value" : 80.92},
+		{"label" : "Classical", "value" : 13.32},
+		{"label" : "Jazz", "value" : 11.79}
+	]},
+{"year" : "2009", "data" :[
+		{"label" : "Christian/Gospel", "value" : 27.82},
+		{"label" : "Country", "value" : 46.13},
+		{"label" : "Electronic", "value" : 0},
+		{"label" : "Latin", "value" : 16.5},
+		{"label" : "R&B", "value" : 69.89},
+		{"label" : "Rock", "value" : 124.16},
+		{"label" : "Pop", "value" : 0},
+		{"label" : "Alternative", "value" : 68.2},
+		{"label" : "Classical", "value" : 12.14},
+		{"label" : "Jazz", "value" : 11.78}
+	]},
+{"year" : "2010", "data" :[
+		{"label" : "Christian/Gospel", "value" : 24.23},
+		{"label" : "Country", "value" : 43.72},
+		{"label" : "Electronic", "value" : 8.74},
+		{"label" : "Latin", "value"	: 12.35},
+		{"label" : "R&B", "value" : 57.87},
+		{"label" : "Rock", "value" : 103.71},
+		{"label" : "Pop", "value" : 0},
+		{"label" : "Alternative", "value" : 53.73},
+		{"label" : "Classical", "value"	: 8.96},
+		{"label" : "Jazz", "value" : 8.78}
+	]},
+{"year" : "2011", "data" :[
+		{"label" : "Christian/Gospel", "value" : 23.73},
+		{"label" : "Country", "value" : 42.92},
+		{"label" : "Electronic", "value" : 10.05},
+		{"label" : "Latin", "value" : 11.81},
+		{"label" : "R&B", "value" : 55.44},
+		{"label" : "Rock", "value" : 105.69},
+		{"label" : "Pop", "value" : 0},
+		{"label" : "Alternative", "value" : 55.03},
+		{"label" : "Classical", "value" : 9.57},
+		{"label" : "Jazz", "value" : 11.08}
+	]},		
+{"year" : "2012", "data" : [
+		{"label" : "Christian/Gospel", "value" : 22.9},
+		{"label" : "Country", "value" : 44.6},
+		{"label" : "Electronic", "value" : 8.7},
+		{"label" : "Latin", "value" : 9.7},
+		{"label" : "R&B", "value" : 49.7},
+		{"label" : "Rock", "value" : 102.5},
+		{"label" : "Pop", "value" : 0},
+		{"label" : "Alternative", "value" : 52.2},
+		{"label" : "Classical", "value" : 7.5},
+		{"label" : "Jazz", "value" : 8.1}
+	]},		
+{"year" : "2013", "data" : [
+		{"label" : "Christian/Gospel", "value" : 19.53},
+		{"label" : "Country", "value" : 34.46},
+		{"label" : "Electronic", "value" : 7.11},
+		{"label" : "Latin", "value" : 8.27},
+		{"label" : "R&B", "value" : 47.78},
+		{"label" : "Rock", "value" : 92.93},
+		{"label" : "Pop", "value" : 24.62},
+		{"label" : "Alternative", "value" : 0},
+		{"label" : "Classical", "value" : 0},
+		{"label" : "Jazz", "value" : 0}
+	]},	
+{"year" : "2014", "data" : [
+		{"label" : "Christian/Gospel", "value" : 17.36},
+		{"label" : "Country", "value" : 30.46},
+		{"label" : "Electronic", "value" : 5.26},
+		{"label" : "Latin", "value" : 6.26},
+		{"label" : "R&B", "value" : 35.75},
+		{"label" : "Rock", "value" : 85.25},
+		{"label" : "Pop", "value" : 27.71},
+		{"label" : "Alternative", "value" : 0},
+		{"label" : "Classical", "value" : 0},
+		{"label" : "Jazz", "value" : 0}
+	]}	
+]
