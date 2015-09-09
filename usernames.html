@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitHub Search</title>
+  <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  <style>
+  .bar {
+    fill: green;
+  }
+  .axis path, .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+  }
+  </style>
+</head>
+
+<body>
+
+  <div id="input">
+    <h2>Enter Name to search for</h2>
+    <input type="text" placeholder="Enter username" id="term"/>
+    <button id="search" onclick="search()">Search</button>
+  </div>
+  <br>
+
+  <div id="info">hover for info; * = non-alpha chars</div>
+  <div id="display"></div> 
+ 
+  <script>
+      // execute when user clicks on search button
+      function search() {
+        
+        // find out the searchterm (set default?)
+        var term = document.getElementById("term").value;
+        
+        // get user
+        function getUserNames(display_function) {
+          $.get("https://api.github.com/search/users?q=" + term, 
+            function(data, status){
+              // call display function on data
+              success: display_function(data.items);
+          });
+        };
+
+      // display info
+      function getDisplay(data) {
+        d3.select("svg").remove();
+        // limit to first 5 items
+        var temp = data.slice(0,5);
+        var char_list = [];
+        var store = {"other":0};
+        var alpha = 'abcdefghijklmnopqrstuvwxyz';
+        var output = [];
+        // make list of letters
+        for (var i=0; i<temp.length; i++){
+          char_list = temp[i].login.toLowerCase();
+          for (var j=0; j<char_list.length; j++){
+            // test for other
+            if (alpha.indexOf(char_list[j])>-1){
+              if (store[char_list[j]]!=undefined){
+                store[char_list[j]] += 1;
+              } else {
+                store[char_list[j]] = 1;
+              }
+            } else {
+              store["other"] +=1;
+            }
+          }
+          char_list = [];
+        }
+
+        // reuse char list?
+        for (var i=0;i<26;i++){
+          if (store[alpha[i]]!=undefined){
+            output.push({"letter":alpha[i],number:store[alpha[i]]});
+          } else {
+            output.push({"letter":alpha[i],number:0});
+          }
+        }
+        output.push({"letter":"*",number:store["other"]});
+
+        var pad = 50;
+        var height = 500-(2*pad);
+        var width = 800-(2*pad);
+
+        var x = d3.scale.ordinal().rangeRoundBands([0,width], .1);
+        var y = d3.scale.linear().range([height,0]);
+        var xAxis = d3.svg.axis().scale(x).orient("bottom");
+        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5).tickFormat(d3.format('.0f'));
+
+        x.domain(output.map(function(d) { return d.letter; }));
+        y.domain([0,d3.max(output, function(d) { return d.number; })]);
+
+        var svg = d3.select("#display").append("svg")
+          .attr("height",height+(2*pad))
+          .attr("width",width+(2*pad))
+          .append("g")
+          .attr("transform","translate(" + pad +"," + pad + ")");
+
+        svg.append("g")
+          .attr("class","axis")
+          .attr("transform","translate(0," + height + ")")
+          .call(xAxis);
+        svg.append("g")
+          .attr("class","axis")
+          .call(yAxis)
+          .append("text")
+          .attr("text-anchor","end")
+          .attr("transform","rotate(-90)")
+          .attr("x",((height-pad)/-2))
+          .attr("dy","-2.3em")
+          .text("Occurances");
+        svg.selectAll(".bar")
+          .data(output)
+          .enter()
+          .append("rect")
+          .attr("class","bar")
+          .attr("x",function(d) { return x(d.letter); })
+          .attr("width",x.rangeBand())
+          .attr("y", function(d) { return y(d.number); })
+          .attr("height", function(d) { return height - y(d.number); })
+          .on("mouseover",function(d){
+            document.getElementById("info").innerHTML = d.letter + ": " + d.number;
+          })
+          .on("mouseout", function(d){
+            document.getElementById("info").innerHTML = "hover for info; * = non-alpha chars";
+          });
+      }
+ 
+    //call user search function
+    getUserNames(getDisplay);
+ 
+  };
+
+  </script>
+</body>
+</html>
