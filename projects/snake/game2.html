@@ -1,0 +1,173 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+    <style type="text/css">
+    #svg, #svg2 {
+      border-style: solid;
+      border-width: 3px;
+    }
+    </style>
+  </head>
+  <body>
+    <button onclick="start()">START</button>
+    <button onclick="stop()">STOP</button>
+  </body>
+
+  <script type="text/javascript">
+  // create divs & buttons
+  var div_highscore = document.createElement("div")
+  var div_score = document.createElement("div")
+  var motion = document.createElement("div")
+  motion.id = "motion"
+  document.body.appendChild(div_score);
+  document.body.appendChild(div_highscore);
+  document.body.appendChild(motion);
+  div_highscore.innerHTML = "your highscore: 0"
+  div_score.innerHTML = "score: 0"
+
+  var width = 400,
+    height = 400;
+
+  var worm = [];
+
+  var myTimer;
+  var key = ""
+  var food_x, food_y;
+  var score = 0;
+
+  document.cookie=0
+
+  var svg = d3.select("#motion")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("id","svg")
+
+  document.onkeydown = function(e){
+    // get direction
+    if (e.keyCode == 38) {
+      if (key != "down") {key = "up"}
+    } else if (e.keyCode == 40) {
+      if (key != "up") {key = "down"}
+    } else if (e.keyCode == 37) {
+      if (key != "right") {key = "left"}
+    } else if (e.keyCode == 39) {
+      if (key != "left") {key = "right"}
+    }
+  }
+
+  function move(){
+    d3.select("svg").selectAll("rect").data(worm).enter().append("rect")
+      .attr("width",20)
+      .attr("height",20)
+      .attr("x", function(d){return d.x})
+      .attr("y", function(d){return d.y})
+    // only move if a key has been pushed/set
+    if (key != "") {
+      // set each dir to the dir before it (worm[0] gets key direction), then move
+      worm[0].dir = key
+      // check collisions: food or die (self, walls)
+      // console.log(food_x,food_y)
+      // console.log(worm[0])
+      if (check_collisions(worm[0]) == "food"){
+        food_x = Math.floor(Math.random()*9)*(width/10)
+        food_y = Math.floor(Math.random()*9)*(height/10)
+        d3.select("#food").attr("cx",food_x + 10).attr("cy",food_y + 10)
+        score += 1
+        div_score.innerHTML = "score: " + score
+        // add to tail
+        worm.push({"x":worm[worm.length-1].x,"y":worm[worm.length-1].y,"dir":worm[worm.length-1].dir})
+      } else if (check_collisions(worm[0]) == "die"){
+        // set new highscore
+        if (score>document.cookie[0]){
+          document.cookie = score
+        }
+        svg.selectAll("*").remove()
+        score = 0
+        div_score.innerHTML = "LOST"
+      }
+
+      //move
+      d3.selectAll("rect").each(function(d,i){
+        if (d.dir=="up"){
+          d3.select(this).transition().attr("y",d.y-20)
+          worm[i].y -= 20 
+        } else if (d.dir == "down"){
+          d3.select(this).transition().attr("y",d.y+20)
+          worm[i].y += 20 
+        } else if (d.dir == "right"){
+          d3.select(this).transition().attr("x",d.x+20)
+          worm[i].x += 20 
+        } else if (d.dir == "left"){
+          d3.select(this).transition().attr("x",d.x-20)
+          worm[i].x -= 20 
+        }
+      })
+      // set next element's dir to the one before it
+      for(var j=worm.length-1;j>0;j--){
+        worm[j].dir = worm[j-1].dir
+      }
+    }
+  }
+
+  function check_collisions(head) {
+    if ( (head.dir == "left") && (head.x == (food_x+20)) && (head.y == food_y) ) {
+      return "food"
+    } else if ( (head.dir == "right") && (head.x == (food_x-20)) && (head.y == food_y) ) {
+      return "food"
+    } else if ( (head.dir == "down") && (head.x == food_x) && (head.y == (food_y-20)) ){
+      return "food"
+    } else if ( (head.dir == "up") && (head.x == food_x) && (head.y == (food_y+20)) ) {
+      return "food"
+    }
+    if ( ((head.x>(width-20)) || (head.x<0)) || ((head.y>(height-20)) || (head.y<0)) ){
+      return "die"
+    }
+    // check against self
+    for (var i=1;i<worm.length;i++){
+      if ( (head.dir == "left") && (head.x == (worm[i].x+20)) && (head.y == worm[i].y) ) {
+        return "die"
+      } else if ( (head.dir == "right") && (head.x == (worm[i].x-20)) && (head.y == worm[i].y) ) {
+        return "die"
+      } else if ( (head.dir == "down") && (head.x == worm[i].x) && (head.y == (worm[i].y-20)) ){
+        return "die"
+      } else if ( (head.dir == "up") && (head.x == worm[i].x) && (head.y == (worm[i].y+20)) ) {
+        return "die"
+      }
+    }
+  }
+
+  function stop() {
+    clearInterval(myTimer)
+  }
+
+  function start() {
+    div_highscore.innerHTML = "your highscore: " + document.cookie[0]
+    clearInterval(myTimer)
+    myTimer = setInterval(move, 200)
+    worm = []
+    key = ""
+    score = 0
+    div_score.innerHTML = "score: " + score
+    worm.push({"x":0,"y":0,"dir":"null"})
+    // clear board
+    svg.selectAll("*").remove()
+    // place player
+    d3.select("svg").selectAll("rect").data(worm).enter().append("rect")
+      .attr("width",20)
+      .attr("height",20)
+      .attr("x", function(d){return d.x})
+      .attr("y", function(d){return d.y})
+    // place random food
+    food_x = Math.floor(Math.random()*9)*(width/10)
+    food_y = Math.floor(Math.random()*9)*(height/10)
+    food = d3.select("svg").append("circle")
+      .attr("r",10)
+      .attr("cx",food_x+10)
+      .attr("cy",food_y+10)
+      .attr("id","food")
+      .style("fill","green")
+  }
+
+  </script>
+</html>
