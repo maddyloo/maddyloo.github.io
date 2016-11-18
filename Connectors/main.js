@@ -3,6 +3,7 @@
 var myConnector = tableau.makeConnector();
 
 var CLIENT_ID = "0d78319bc5524946a22a085d45ade53c";
+// make sure this is upadated in the Spotify app you registered
 var REDIRECT_URI = "http://maddyloo.github.io/Connectors/index.html";
 var url = "https://accounts.spotify.com/authorize/?client_id=" + 
 CLIENT_ID + 
